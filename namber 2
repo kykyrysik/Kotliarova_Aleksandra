@@ -1,0 +1,56 @@
+#2-1 ranning lite
+import RPi.GPIO as gpio
+import time
+
+leds = [2, 3, 4, 17, 27, 22, 10, 9]
+
+gpio.setmode(gpio.BCM)
+
+gpio.setup(leds, gpio.OUT)
+
+for i in range(3):
+    for j in range(8):
+        gpio.output(leds[j], 1)
+        time.sleep(0.2)
+        gpio.output(leds[j], 0)
+
+
+gpio.output(leds,0)
+gpio.cleanup()
+#2-2 bin nomber py
+import RPi.GPIO as gpio
+import time
+
+dac = [8, 11, 7, 1, 0, 5, 12, 6]
+
+number = [0, 0, 0, 0, 0, 0, 0, 0]
+
+gpio.setmode(gpio.BCM)
+
+gpio.setup(dac, gpio.OUT)
+
+gpio.output(dac, number)
+
+time.sleep(20)
+
+gpio.output(dac, 8*[0])
+
+gpio.cleanup()
+#2-3 aux py
+import RPi.GPIO as gpio
+import time
+
+leds = [2, 3, 4, 17, 27, 22, 10, 9]
+
+aux = [21, 20, 26, 16, 19, 25, 23, 24]
+
+gpio.setmode(gpio.BCM)
+
+gpio.setup(leds, gpio.OUT)
+
+gpio.setup(aux, gpio.IN)
+
+
+while(True):
+    for i in range(8):
+        gpio.output(leds[i], gpio.input(aux[i]))
