@@ -1,0 +1,66 @@
+#4-1 dac
+    return binary_list[::-1]
+
+try:
+    while True:
+        a = input()
+        if a == "q":
+            break
+        elif int(a) < 0:
+            print("ввел отрицатеьное")
+        elif int(a) > 255:
+            print("значение превышающие возможности 8-ми разрядного ЦАП")
+        
+        a = int(a)#вводи число 0 - 255 !!!
+
+        if not float(a):
+            print("не число")
+        a1= round(a)# приводит к целому виду
+        if a1 != a:
+            print("ввел не целое")
+        gpio.output(dac, translator(a))
+        V = a/255*3.3
+        print("напряжение V =", '{:.3f}'.format(V),"вольт")
+
+finally:
+    gpio.output(dac,0)
+    gpio.cleanup()
+# когда запускаешь, сначала нажми Ctrl+F5, потом подожди странных надписей, а потом вписывыай число
+#4-2
+#скрипт, формирующий на выходе ЦАП треугольный сигнал, амплитуда котрого равна динамическому диапазону ЦАП
+import RPi.GPIO as gpio
+import time
+
+dac = [8,11,7,1,0,5,12,6]
+gpio.setmode(gpio.BCM)
+gpio.setup(dac, gpio.OUT)
+
+def dec2bin(n):#функция перевода из 10-го в 2-е число
+    return [int(bit) for bit in bin(n)[2:].zfill(8)]
+
+a=0
+t= float(input())
+try:
+    while True:
+        while a<255:
+            bin_a = dec2bin(a)
+            gpio.output(dac, bin_a)
+#4-3
+# собрать RC-цепь и подключить ее вход к GPIO пину. 
+# Скрипт, вормирующий на выходе RC-цепи задаваемое широтно-импульсной модуляцией значение АЦП Uout
+import RPi.GPIO as gpio
+
+gpio.setmode(gpio.BCM)
+gpio.setup(20, gpio.OUT)
+p = gpio.PWM(20,100)
+p.start(0)
+
+try:
+    while True:
+        dc = float(input())
+        p.ChangeDutyCycle(dc)
+        V = 3.3 * dc/ 100
+        print("V =",V)
+
+finally:
+    p.stop()
