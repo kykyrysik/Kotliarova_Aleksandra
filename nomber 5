@@ -1,0 +1,131 @@
+#5-1 adc simple py
+#простейший ацп
+import RPi.GPIO as gpio
+import time
+
+dac = [8,11,7,1,0,5,12,6]
+comp = 14
+troyka = 13
+
+gpio.setmode(gpio.BCM)
+gpio.setup(dac, gpio.OUT)
+gpio.setup(troyka , gpio.OUT,initial = gpio.HIGH)
+#gpio.setup(troyka , inital)
+gpio.setup(comp, gpio.IN)
+
+#функция перевода десятичного числа в список 0 и 1
+def dec2bin(n):#функция перевода из 10-го в 2-е число
+    return [int(bit) for bit in bin(n)[2:].zfill(8)]
+
+#функция возвращает десятичное число, проспорциональное напряжению на клеме S тройка-модуля
+def adc():
+    for i in range (256):
+        gpio.output(dac, dec2bin(i))
+        time.sleep(0.007)
+        if gpio.input(comp) == 1:
+            return i
+    return 255
+
+
+try:
+    while True:
+        a = adc()
+        V = a*3.3 / 256
+        print('V =',V,'В')
+        time.sleep(0.1)
+
+
+finally:
+    gpio.output(dac,0)
+    gpio.output(troyka,0)
+    gpio.cleanup()
+# 5-2 adc-sar
+# скрипт, реализующий алгоритм последовательного приближения 
+import RPi.GPIO as gpio
+import time
+
+dac = [8,11,7,1,0,5,12,6]
+comp = 14
+troyka = 13
+
+gpio.setmode(gpio.BCM)
+gpio.setup(dac, gpio.OUT)
+gpio.setup(troyka , gpio.OUT,initial = gpio.HIGH)
+gpio.setup(comp, gpio.IN)
+
+#функция перевода десятичного числа в список 0 и 1
+def dec2bin(n):#функция перевода из 10-го в 2-е число
+    return [int(bit) for bit in bin(n)[2:].zfill(8)]
+
+def adc():
+    
+    a = 0
+    for i in range(7, -1, -1):
+        step = 2 ** i
+        print('comp = ',gpio.input(comp))
+        #print('step', step)
+        a += step
+        #print('+a', a)
+        gpio.output(dac, dec2bin(i))
+        time.sleep(0.001)
+        if gpio.input(comp) == 1:
+            a -= step
+            #print('-a', a)
+    time.sleep(0.001)
+    #print('a = ', a)
+    return a
+
+try:
+    while True:
+        print('!comp = ',gpio.input(comp))
+        b = adc()
+        V = b *3.3 /256
+        print('V =',V,'В')
+        time.sleep(0.001)
+finally:
+    gpio.output(dac,0)
+    gpio.output(troyka,0)
+    gpio.cleanup()
+#5-3
+# скрипт
+import RPi.GPIO as gpio
+import time
+
+dac = [8,11,7,1,0,5,12,6]
+leds = [2,3,4,17,27,22,10,9]
+comp = 14
+troyka = 13
+
+gpio.setmode(gpio.BCM)
+gpio.setup(dac, gpio.OUT)
+gpio.setup(leds, gpio.OUT)
+gpio.setup(troyka , gpio.OUT,initial = gpio.HIGH)
+gpio.setup(comp, gpio.IN)
+
+def dec2bin(n):#функция перевода из 10-го в 2-е число
+    return [int(bit) for bit in bin(n)[2:].zfill(8)]
+
+#функция возвращает десятичное число, проспорциональное напряжению на клеме S тройка-модуля
+def adc():
+    for i in range (256):
+        gpio.output(dac, dec2bin(i))
+        time.sleep(0.007)
+        if gpio.input(comp) == 1:
+            return i
+    return 255
+
+try:
+    while True:
+        a = adc()
+        V = a* 3.3 / 256
+        b = min(int((a/255)* 8 ),8)
+        state = [0] * 8
+        for i in range(b):
+            state[7 - i] = 1
+        gpio.output(leds,state)
+        print('V = ', V)
+        time.sleep(0.1)
+finally:
+    gpio.output(dac,0)
+    gpio.output(troyka,0)
+    gpio.cleanup()
